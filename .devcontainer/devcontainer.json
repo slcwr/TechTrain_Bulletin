@@ -1,0 +1,96 @@
+{
+  "name": "React with nvm + Vite",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "NVM_VERSION": "0.39.7",
+      "NODE_VERSION": "20"
+    }
+  },
+
+  // ポートフォワーディング（Viteのデフォルトポート）
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "Vite Dev Server",
+      "onAutoForward": "notify"
+    }
+  },
+
+  // VSCode拡張機能
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // React/TypeScript
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "dsznajder.es7-react-js-snippets",
+
+        // Git
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+
+        // 便利ツール
+        "christian-kohler.path-intellisense",
+        "formulahendry.auto-rename-tag",
+        "PKief.material-icon-theme",
+        "usernamehw.errorlens",
+
+        // TypeScript
+        "yoavbls.pretty-ts-errors"
+      ],
+      "settings": {
+        // Prettier設定
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+
+        // ESLint設定
+        "eslint.enable": true,
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+
+        // TypeScript設定
+        "typescript.updateImportsOnFileMove.enabled": "always",
+        "javascript.updateImportsOnFileMove.enabled": "always",
+
+        // ファイル関連
+        "files.eol": "\n",
+        "files.insertFinalNewline": true,
+        "files.trimTrailingWhitespace": true,
+
+        // エディタ設定
+        "editor.tabSize": 2,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        }
+      }
+    }
+  },
+
+  // コンテナ起動後に実行するコマンド
+  "postCreateCommand": "bash -c 'source ~/.nvm/nvm.sh && node --version && npm --version'",
+
+  // コンテナ内でのユーザー
+  "remoteUser": "vscode",
+
+  // 環境変数
+  "remoteEnv": {
+    "NVM_DIR": "/home/vscode/.nvm"
+  },
+
+  // マウント設定（Dockerボリュームを使用）
+  "mounts": [
+    "source=npm-cache,target=/home/vscode/.npm,type=volume"
+  ],
+
+  // コンテナの機能（オプション）
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest"
+    }
+  }
+}
