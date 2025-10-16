@@ -1,0 +1,466 @@
+# Feature-Sliced Design 各層の役割ガイド
+
+## 概要
+
+Feature-Sliced Design (FSD) は、フロントエンドアプリケーションを7つの層に分けて構造化する設計手法です。
+各層には明確な役割があり、**上の層から下の層への一方向の依存**のみが許可されます。
+
+```
+app/          ← アプリケーション全体の初期化
+pages/        ← ページ・ルート
+widgets/      ← 大きなUIブロック
+features/     ← ユーザーの操作・機能
+entities/     ← ビジネスエンティティ
+shared/       ← 共通の汎用コード
+```
+
+---
+
+## 1. app/ - アプリケーション層
+
+### 役割
+アプリケーション全体の初期化と設定を管理する最上位層です。
+
+### 配置するもの
+- ルーティング設定
+- グローバルなプロバイダー（認証、テーマ、状態管理）
+- グローバルスタイル
+- アプリケーションのエントリーポイント
+
+### 具体例
+```typescript
+// app/providers/index.tsx
+export const AppProvider = ({ children }) => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <ThemeProvider>
+        {children}
+      </ThemeProvider>
+    </AuthProvider>
+  </QueryClientProvider>
+);
+
+// app/routes/index.tsx
+export const AppRoutes = () => (
+  <Routes>
+    <Route path="/" element={<HomePage />} />
+    <Route path="/profile" element={<ProfilePage />} />
+  </Routes>
+);
+```
+
+### 依存関係
+- すべての下位層を使用できる
+- 他の層から依存されない
+
+---
+
+## 2. pages/ - ページ層
+
+### 役割
+ルーティングに対応する各ページを定義します。widgetsとfeaturesを組み合わせてページを構築します。
+
+### 配置するもの
+- ページコンポーネント
+- ページ固有のレイアウト
+- ページレベルのデータフェッチング
+
+### 具体例
+```typescript
+// pages/ProfilePage/ui/ProfilePage.tsx
+import { ProfileHeader } from '@/widgets/profile';
+import { EditProfileForm } from '@/features/profile';
+import { UserCard } from '@/entities/user';
+
+export const ProfilePage = () => {
+  return (
+    <div>
+      <ProfileHeader />
+      <UserCard />
+      <EditProfileForm />
+    </div>
+  );
+};
+```
+
+### フォルダ構造
+```
+pages/
+  HomePage/
+    ui/
+      HomePage.tsx
+    index.ts
+  ProfilePage/
+    ui/
+      ProfilePage.tsx
+    index.ts
+```
+
+### 依存関係
+- widgets, features, entities, shared を使用できる
+- app から使用される
+
+---
+
+## 3. widgets/ - ウィジェット層
+
+### 役割
+複数のfeaturesやentitiesを組み合わせた、独立した大きなUIブロックを定義します。
+
+### 配置するもの
+- ヘッダー、フッター、サイドバー
+- ダッシュボードのカード
+- 複合的なUIコンポーネント
+
+### 具体例
+```typescript
+// widgets/header/ui/Header.tsx
+import { Logo } from '@/shared/ui';
+import { AuthButton } from '@/features/auth';
+import { NotificationBell } from '@/features/notifications';
+import { UserMenu } from '@/entities/user';
+
+export const Header = () => {
+  return (
+    <header>
+      <Logo />
+      <NotificationBell />
+      <UserMenu />
+      <AuthButton />
+    </header>
+  );
+};
+```
+
+### フォルダ構造
+```
+widgets/
+  header/
+    ui/
+      Header.tsx
+    index.ts
+  sidebar/
+    ui/
+      Sidebar.tsx
+    index.ts
+```
+
+### 依存関係
+- features, entities, shared を使用できる
+- pages, app から使用される
+
+---
+
+## 4. features/ - 機能層
+
+### 役割
+**ユーザーの操作や機能**を実装します。ビジネスロジックとUI操作を含みます。
+
+### 配置するもの
+- ログイン・ログアウト
+- いいねボタン
+- コメント投稿
+- カート追加ボタン
+- フィルタリング機能
+
+### 具体例
+```typescript
+// features/auth/login/ui/LoginForm.tsx
+import { Button, Input } from '@/shared/ui';
+import { userApi } from '@/entities/user';
+
+export const LoginForm = () => {
+  const handleLogin = async (credentials) => {
+    await userApi.login(credentials);
+  };
+
+  return (
+    <form onSubmit={handleLogin}>
+      <Input name="email" />
+      <Input name="password" type="password" />
+      <Button type="submit">ログイン</Button>
+    </form>
+  );
+};
+```
+
+### フォルダ構造
+```
+features/
+  auth/
+    login/
+      ui/
+        LoginForm.tsx
+      api/
+        loginApi.ts
+      model/
+        useLogin.ts
+      index.ts
+    logout/
+  cart/
+    add-to-cart/
+    remove-from-cart/
+```
+
+### 依存関係
+- entities, shared を使用できる
+- **同じfeatures層内での相互依存は禁止**
+- widgets, pages, app から使用される
+
+---
+
+## 5. entities/ - エンティティ層
+
+### 役割
+**ビジネスの中心となるデータモデル**を定義します。featuresで使用される基本的なデータとロジックを提供します。
+
+### 配置するもの
+- ユーザー、商品、注文などのモデル
+- 基本的なCRUD操作のAPI
+- エンティティの表示用UIコンポーネント
+- 型定義
+
+### 具体例
+```typescript
+// entities/user/api/userApi.ts
+import { apiClient } from '@/shared/api';
+
+export const userApi = {
+  getUser: (id: string) =>
+    apiClient.get(`/users/${id}`),
+  updateUser: (id: string, data: UserData) =>
+    apiClient.put(`/users/${id}`, data),
+};
+
+// entities/user/ui/UserCard.tsx
+export const UserCard = ({ user }: { user: User }) => {
+  return (
+    <div>
+      <Avatar src={user.avatar} />
+      <h3>{user.name}</h3>
+      <p>{user.email}</p>
+    </div>
+  );
+};
+
+// entities/user/model/types.ts
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+}
+```
+
+### フォルダ構造
+```
+entities/
+  user/
+    api/
+      userApi.ts
+    model/
+      types.ts
+      userStore.ts
+    ui/
+      UserCard.tsx
+      UserAvatar.tsx
+    index.ts
+  product/
+    api/
+    model/
+    ui/
+```
+
+### 依存関係
+- shared のみ使用できる
+- **同じentities層内での相互依存は禁止**
+- features, widgets, pages, app から使用される
+
+---
+
+## 6. shared/ - 共有層
+
+### 役割
+**アプリケーション全体で使用される汎用的なコード**を提供します。ビジネスロジックを含まない、再利用可能なコードのみを配置します。
+
+### 配置するもの
+- UIコンポーネント（Button, Input, Modal）
+- ユーティリティ関数
+- HTTPクライアント設定
+- 定数
+- 型ヘルパー
+
+### 具体例
+```typescript
+// shared/ui/Button/Button.tsx
+export const Button = ({ children, ...props }) => {
+  return <button {...props}>{children}</button>;
+};
+
+// shared/api/client.ts
+import axios from 'axios';
+
+export const apiClient = axios.create({
+  baseURL: process.env.API_URL,
+  timeout: 10000,
+});
+
+// shared/lib/formatDate.ts
+export const formatDate = (date: Date) => {
+  return new Intl.DateTimeFormat('ja-JP').format(date);
+};
+
+// shared/config/constants.ts
+export const APP_NAME = 'My App';
+export const API_TIMEOUT = 10000;
+```
+
+### フォルダ構造
+```
+shared/
+  ui/
+    Button/
+    Input/
+    Modal/
+  api/
+    client.ts
+  lib/
+    formatDate.ts
+    validation.ts
+  config/
+    constants.ts
+  types/
+    common.ts
+```
+
+### 依存関係
+- **他のどの層にも依存しない**
+- すべての層から使用される
+
+---
+
+## 各層の判断基準
+
+### 「これはどの層？」と迷ったときのチェックリスト
+
+#### features vs entities
+- **ユーザーの操作がある** → features（例：ログインフォーム、いいねボタン）
+- **データの表示だけ** → entities（例：ユーザーカード、商品情報）
+
+#### widgets vs features
+- **複数の機能を組み合わせた大きなブロック** → widgets（例：ヘッダー）
+- **単一の操作** → features（例：ログアウトボタン）
+
+#### entities vs shared
+- **ビジネス固有のもの** → entities（例：User, Product）
+- **どのプロジェクトでも使える汎用的なもの** → shared（例：Button, formatDate）
+
+---
+
+## セグメント構造
+
+各層の中は、さらに「セグメント」で分割されます。
+
+```
+features/
+  auth/                 ← スライス（機能単位）
+    login/              ← サブスライス（必要に応じて）
+      ui/               ← セグメント（UI）
+      api/              ← セグメント（API）
+      model/            ← セグメント（ロジック・状態）
+      lib/              ← セグメント（ヘルパー関数）
+      config/           ← セグメント（設定）
+      index.ts          ← パブリックAPI
+```
+
+### 主なセグメント
+
+- **ui/** - UIコンポーネント
+- **api/** - サーバーとの通信
+- **model/** - 状態管理、ビジネスロジック、型定義
+- **lib/** - ヘルパー関数
+- **config/** - 設定、定数
+
+---
+
+## 依存関係の原則まとめ
+
+```
+✅ 許可される依存
+app      → すべて
+pages    → widgets, features, entities, shared
+widgets  → features, entities, shared
+features → entities, shared
+entities → shared
+shared   → なし
+
+❌ 禁止される依存
+- 下の層から上の層への依存
+- 同じ層内での相互依存（features ↔ features, entities ↔ entities）
+```
+
+---
+
+## 実践例：ユーザープロフィール機能
+
+```
+shared/
+  ui/
+    Button.tsx
+    Input.tsx
+  api/
+    client.ts
+
+entities/
+  user/
+    api/
+      userApi.ts          # GET /users/:id
+    model/
+      types.ts            # User型定義
+    ui/
+      UserCard.tsx        # ユーザー情報表示
+
+features/
+  profile/
+    edit-profile/
+      ui/
+        EditProfileForm.tsx  # プロフィール編集フォーム
+      api/
+        updateProfile.ts     # PUT /users/:id（userApi使用）
+      model/
+        useEditProfile.ts    # 編集ロジック
+
+widgets/
+  profile/
+    ui/
+      ProfileHeader.tsx   # UserCard + EditProfileForm を組み合わせ
+
+pages/
+  ProfilePage/
+    ui/
+      ProfilePage.tsx     # ProfileHeader を配置
+```
+
+---
+
+## よくある質問
+
+### Q: APIクライアントはどこに置く？
+A: 基本設定は `shared/api/client.ts`、エンティティ固有の操作は `entities/*/api/`、機能固有の操作は `features/*/api/`
+
+### Q: 型定義はどこに置く？
+A: エンティティの型は `entities/*/model/types.ts`、共通の型は `shared/types/`
+
+### Q: featuresとentitiesの境界が曖昧
+A: 「ユーザーが操作するもの」はfeatures、「データの表示・管理」はentities
+
+### Q: 同じ層内で共通のものを使いたい
+A: 下の層（shared や entities）に移動する
+
+---
+
+## まとめ
+
+Feature-Sliced Designは、**明確な役割分担**と**一方向の依存関係**により、拡張性と保守性の高いフロントエンドアーキテクチャを実現します。
+
+各層の役割を理解し、適切に配置することで、長期的にメンテナンスしやすいコードベースを構築できます。
