@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(),
   Pages({
       // ページディレクトリ
-      dirs: 'src/pages',
+      dirs: 'src/02-pages',
 
       // 拡張子
       extensions: ['tsx', 'ts'],
