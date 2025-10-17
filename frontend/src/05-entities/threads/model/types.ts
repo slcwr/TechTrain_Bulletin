@@ -1,6 +1,6 @@
 export interface Threads {
- id: string;
- title: string;
+  id: string;
+  title: string;
 }
 
 export interface Post {

@@ -1,4 +1,4 @@
-import type { ThreadsResponse,ApiErrorResponse } from '../model/types';
+import type { ThreadsResponse, ApiErrorResponse } from '../model/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 

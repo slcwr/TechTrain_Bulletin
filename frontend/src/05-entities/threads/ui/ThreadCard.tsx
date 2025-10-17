@@ -10,10 +10,7 @@ export function ThreadCard({ thread }: ThreadCardProps) {
   return (
     <Card sx={{ mb: 2, '&:hover': { bgcolor: 'action.hover' } }}>
       <CardContent>
-        <Link
-          to={`/threads/${thread.id}`}
-          style={{ textDecoration: 'none', color: 'inherit' }}
-        >
+        <Link to={`/threads/${thread.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
           <Typography variant="h6" component="h2">
             {thread.title}
           </Typography>

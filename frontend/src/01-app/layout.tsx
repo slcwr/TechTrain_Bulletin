@@ -8,8 +8,8 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   return (
     <>
-    <Header/>
-    <main>{children}</main>
+      <Header />
+      <main>{children}</main>
     </>
-  )
+  );
 }

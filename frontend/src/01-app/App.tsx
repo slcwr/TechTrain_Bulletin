@@ -10,11 +10,11 @@ function Routes() {
 function App() {
   return (
     <BrowserRouter>
-    <Layout>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Routes />
-      </Suspense>
-    </Layout>
+      <Layout>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes />
+        </Suspense>
+      </Layout>
     </BrowserRouter>
   );
 }
