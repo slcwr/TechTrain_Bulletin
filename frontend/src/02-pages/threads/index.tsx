@@ -9,6 +9,8 @@ export default function ThreadsPage() {
     queryFn: () => getThreads(),
   });
 
+  console.log('data:',data);
+
   if (isLoading) return <CircularProgress />;
   if (error) return <Alert severity="error">{error.message}</Alert>;
 

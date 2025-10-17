@@ -1,7 +1,7 @@
 export default function ThreadCreatePage() {
   return (
     <div>
-      <h1>°¹ìÃÉ\</h1>
+      <h1>ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆ</h1>
       {/* <ThreadCreateForm /> */}
     </div>
   );
