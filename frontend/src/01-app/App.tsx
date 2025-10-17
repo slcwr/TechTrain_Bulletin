@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { BrowserRouter, useRoutes } from 'react-router-dom';
 import routes from '~react-pages';
-import './styles/App.css';
+import Layout from './layout';
 
 function Routes() {
   return useRoutes(routes);
@@ -10,9 +10,11 @@ function Routes() {
 function App() {
   return (
     <BrowserRouter>
+    <Layout>
       <Suspense fallback={<div>Loading...</div>}>
         <Routes />
       </Suspense>
+    </Layout>
     </BrowserRouter>
   );
 }

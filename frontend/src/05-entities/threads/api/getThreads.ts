@@ -18,5 +18,7 @@ export const getThreads = async (offset = 0): Promise<ThreadsResponse> => {
     throw new Error(`[${response.status}] ${errorData.ErrorMessageJP || errorData.ErrorMessageEN}`);
   }
 
-  return response.json();
+  // APIは配列を直接返すので、ThreadsResponseの形式に変換
+  const threads = await response.json();
+  return { threads };
 };
