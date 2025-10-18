@@ -1,15 +1,25 @@
 import type { ReactNode } from 'react';
-import Header from '../03-widgets/header/header';
+import { Box } from '@mui/material';
+import { Header } from '../03-widgets/header/header';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export const Layout = ({ children }: LayoutProps) => {
   return (
     <>
       <Header />
-      <main>{children}</main>
+      <Box
+        component="main"
+        sx={{
+          backgroundColor: '#c3bfbfff',
+          minHeight: 'calc(100vh - 80px)',
+          padding: 2,
+        }}
+      >
+        {children}
+      </Box>
     </>
   );
-}
+};

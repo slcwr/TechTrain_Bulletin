@@ -1,7 +1,7 @@
 import { AppBar, Toolbar, Typography, Box, Link } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
-export default function Header() {
+export const Header = () => {
   return (
     <AppBar
       position="static"
@@ -31,4 +31,4 @@ export default function Header() {
       </Toolbar>
     </AppBar>
   );
-}
+};

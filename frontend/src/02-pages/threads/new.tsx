@@ -1,8 +1,9 @@
+import { ThreadCreateForm } from '@/04-features/thread-create/TreadCreateForm';
+
 export default function ThreadCreatePage() {
   return (
-    <div>
-      <h1>スレッド作成</h1>
-      {/* <ThreadCreateForm /> */}
-    </div>
+    <>
+      <ThreadCreateForm />
+    </>
   );
 }

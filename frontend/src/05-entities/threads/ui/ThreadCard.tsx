@@ -8,7 +8,14 @@ interface ThreadCardProps {
 
 export function ThreadCard({ thread }: ThreadCardProps) {
   return (
-    <Card sx={{ mb: 2, '&:hover': { bgcolor: 'action.hover' } }}>
+    <Card
+      sx={{
+        backgroundColor: '#ffffffff',
+        '&:hover': { bgcolor: 'action.hover' },
+        border: '1px solid #d8d2d2ff',
+        borderRadius: 0,
+      }}
+    >
       <CardContent>
         <Link to={`/threads/${thread.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
           <Typography variant="h6" component="h2">
